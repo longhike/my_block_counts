@@ -1,0 +1,3 @@
+DROP DATABASE IF EXISTS mbc_db;
+
+CREATE DATABASE mbc_db;
