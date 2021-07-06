@@ -23,7 +23,12 @@ export interface IUser {
   email?: string | null;
 }
 
+export interface ICurrentAssessment {
+  _id: string | null;
+  st_address: string | null;
+}
+
 export interface IState {
   user: IUser;
-  currentAssessmentID: string | null;
+  currentAssessment: ICurrentAssessment;
 }

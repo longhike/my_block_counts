@@ -1,20 +1,25 @@
 import { Router } from "express";
 import { passport } from "../config";
-import { Authenticator } from "../typings";
+import { Authenticator, User } from "../typings";
 
 const router = Router();
 
 const authenticator = new Authenticator();
+const user = new User();
 
 router
   .get("/", authenticator.getUserIfSessionInitiated)
-  .get("/user", authenticator.isAuthenticated, authenticator.getUserIfSessionInitiated)
+  .get("/user", user.isAuthenticated, authenticator.getUserIfSessionInitiated)
   .get("/logout", authenticator.logout)
   .post("/login", passport.authenticate("local"), authenticator.login)
   .post("/signup", authenticator.signup)
-  .post("/forgot-password", authenticator.forgotPassword)
-  .post("/reset-password", authenticator.resetPassword)
-  .put("/update-user", authenticator.isAuthenticated, authenticator.passwordIsValid, authenticator.updateUser)
-
+  .post("/forgot-password", user.forgotPassword)
+  .post("/reset-password", user.resetPassword)
+  .put(
+    "/update-user",
+    user.isAuthenticated,
+    authenticator.passwordIsValid,
+    user.updateUser
+  );
 
 export { router };

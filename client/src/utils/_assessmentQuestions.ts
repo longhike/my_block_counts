@@ -27,128 +27,128 @@ const general_block_features: Question[] = [
   ]),
   new Question(
     "gbf_residents_percent",
-    "Estimate the percent of the block that is residential",
+    "Estimate the percent of the block that is residential:",
     "options",
     ["0%", "1%-20%", "21%-40%", "41%-60%", "61%-80%", "81%-100%"]
   ),
   new Question(
     "gbf_non_resident_properties",
-    "Count the number of non-residential properties",
+    "Count the number of non-residential properties:",
     "counter",
     null
   ),
   new Question(
     "gbf_non_resident_properties_list",
-    "Briefly list the types of non-residential properties (separate by commmas, please)",
+    "Briefly list the types of non-residential properties (separate by commmas, please):",
     "input",
     null
   ),
   new Question(
     "gbf_num_streetlights",
-    "Count the number of streetlights",
+    "Count the number of streetlights:",
     "counter",
     null
   ),
   new Question(
     "gbf_num_utility_poles",
-    "Count the number of utility poles",
+    "Count the number of utility poles:",
     "counter",
     null
   ),
   new Question(
     "gbf_num_trees",
-    "Count the number of trees in public (exclude those on private property)",
+    "Count the number of trees in public (exclude those on private property):",
     "counter",
     null
   ),
   new Question("gbf_num_murals", "Count the number of murals", "counter", null),
   new Question(
     "gbf_num_fire_hydrants",
-    "Count the number of fire hydrants",
+    "Count the number of fire hydrants:",
     "counter",
     null
   ),
   new Question(
     "gbf_num_xwalk_signals",
-    "Count the number of crosswalks with signals",
+    "Count the number of crosswalks with signals:",
     "counter",
     null
   ),
   new Question(
     "gbf_num_xwalks_no_signals",
-    "Count the number of crosswalks without signals",
+    "Count the number of crosswalks without signals:",
     "counter",
     null
   ),
   new Question(
     "gbf_num_gov_cameras",
-    "Count the number of public surveillance cameras (as opposed to those used by private establishments or residences)",
+    "Count the number of public surveillance cameras (as opposed to those used by private establishments or residences):",
     "counter",
     null
   ),
   new Question(
     "gbf_num_priv_cameras",
-    "Count the number of private surveillance cameras (as opposed to those used used by the government for public surveillance)",
+    "Count the number of private surveillance cameras (as opposed to those used used by the government for public surveillance):",
     "counter",
     null
   ),
   new Question(
     "gbf_num_gov_ads_promos",
-    "Count the number of government (publically) funded advertisements or promos with a positive or neutral message (exclude alcohol and tobacco advertising or promotion from this count)",
+    "Count the number of government (publically) funded advertisements or promos with a positive or neutral message (exclude alcohol and tobacco advertising or promotion from this count):",
     "counter",
     null
   ),
   new Question(
     "gbf_num_priv_ads_promos",
-    "Count the number of non-government advertisements or promos with a positive or neutral message (exclude alcohol and tobacco advertising or promotion from this count)",
+    "Count the number of non-government advertisements or promos with a positive or neutral message (exclude alcohol and tobacco advertising or promotion from this count):",
     "counter",
     null
   ),
   new Question(
     "gbf_traffic_control_num_speed_bumps",
-    "Count the number of speed bumps",
+    "Count the number of speed bumps:",
     "counter",
     null
   ),
   new Question(
     "gbf_traffic_control_num_speed_humps",
-    "Count the number of speed humps",
+    "Count the number of speed humps:",
     "counter",
     null
   ),
   new Question(
     "gbf_traffic_control_num_noise_strips",
-    "Count the number of noise strips",
+    "Count the number of noise strips:",
     "counter",
     null
   ),
   new Question(
     "gbf_traffic_control_num_speed_limit_signs",
-    "Count the number of speed limit signs",
+    "Count the number of speed limit signs:",
     "counter",
     null
   ),
   new Question(
     "gbf_traffic_control_num_speed_monitors",
-    "Count the number of electronic speed monitors",
+    "Count the number of electronic speed monitors:",
     "counter",
     null
   ),
   new Question(
     "gbf_traffic_control_num_speed_cameras",
-    "Count the number of speed cameras",
+    "Count the number of speed cameras:",
     "counter",
     null
   ),
   new Question(
     "gbf_traffic_control_num_red_light_cameras",
-    "Count the number of speedbumps",
+    "Count the number of red light cameras:",
     "counter",
     null
   ),
   new Question(
     "gbf_traffic_control_num_traffic_circles",
-    "Count the number of traffic circles",
+    "Count the number of traffic circles:",
     "counter",
     null
   ),
@@ -931,6 +931,10 @@ const health: Question[] = [
     null
   ),
 ];
+
+
+
+
 
 export const AssessmentQuestions: Question[][] = [
   general_block_features,

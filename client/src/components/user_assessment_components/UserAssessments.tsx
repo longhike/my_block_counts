@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import axios, { AxiosResponse } from "axios";
 import { TUserAssessmentsResponseShape } from "../../utils/typings/_types";
-import { IState } from "../../utils/typings/_interfaces";
+import { ICurrentAssessment, IState } from "../../utils/typings/_interfaces";
 import Loading from "../../utils/Loading";
 import { ErrorFlag } from "../../utils/ErrorFlag";
 import UserAssessmentsDisplay from "./user_assessments_components/UserAssessmentsDisplay";
@@ -14,7 +14,7 @@ const UserAssessments = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
   const [userAssessments, setUserAssessments] = useState<
-    TUserAssessmentsResponseShape[]
+    ICurrentAssessment[]
   >([]);
   const userID: string = useSelector((state: IState) => state.user._id!);
 

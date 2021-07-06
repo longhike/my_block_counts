@@ -1,7 +1,7 @@
 import { MouseEvent } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setCurrentAssessmentID } from "../../../redux/actions";
+import { setCurrentAssessment } from "../../../redux/actions";
 import { useHistory } from "react-router-dom";
 import { TUserAssessmentListItemProps } from "../../../utils/typings/_types";
 import { Button, Row, Col } from "react-bootstrap";
@@ -29,7 +29,9 @@ const UserAssessmentListItem = ({
                 className={"user-assessment-list-item-button"}
                 onClick={(e: MouseEvent<HTMLElement>) => {
                   e.preventDefault();
-                  dispatch(setCurrentAssessmentID(assessment_id));
+                  dispatch(
+                    setCurrentAssessment({ _id: assessment_id, st_address })
+                  );
                   history.push("/assessment");
                 }}
               >

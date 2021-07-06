@@ -53,6 +53,24 @@ const Navigator = ({ signOutUserAndHandleState }: TNavigatorProps) => {
               <Nav.Item className={"navbar-nav-items"}>
                 <Nav.Link
                   className={
+                    location.pathname === "/data"
+                      ? "navbar-nav-link disabled"
+                      : "navbar-nav-link"
+                  }
+                  onClick={(e: MouseEvent<HTMLElement>) => {
+                    e.preventDefault();
+                    if (location.pathname !== "/data") {
+                      history.push("/data");
+                      setExpanded((cur) => !cur);
+                    }
+                  }}
+                >
+                  Data Hub
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item className={"navbar-nav-items"}>
+                <Nav.Link
+                  className={
                     location.pathname === "/about"
                       ? "navbar-nav-link disabled"
                       : "navbar-nav-link"
@@ -133,6 +151,24 @@ const Navigator = ({ signOutUserAndHandleState }: TNavigatorProps) => {
                   }}
                 >
                   About
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item className={"navbar-nav-items"}>
+                <Nav.Link
+                  className={
+                    location.pathname === "/data"
+                      ? "navbar-nav-link disabled"
+                      : "navbar-nav-link"
+                  }
+                  onClick={(e: MouseEvent<HTMLElement>) => {
+                    e.preventDefault();
+                    if (location.pathname !== "/data") {
+                      history.push("/data");
+                      setExpanded((cur) => !cur);
+                    }
+                  }}
+                >
+                  Data Hub
                 </Nav.Link>
               </Nav.Item>
               <Nav.Item className={"navbar-nav-items"}>

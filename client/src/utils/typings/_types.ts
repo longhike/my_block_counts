@@ -1,4 +1,5 @@
 import { Question } from "./_classes"
+import { IState, IUser, ICurrentAssessment } from "./_interfaces"
 import { Dispatch, SetStateAction } from "react";
 
 export type TErrorFlagProps = {
@@ -47,13 +48,13 @@ export type TUserAssessmentsResponseShape = {
 };
 
 export type TUserAssessmentsDisplayProps = {
-  userAssessments: TUserAssessmentsResponseShape[];
+  userAssessments: ICurrentAssessment[];
   getUserAssessmentsAndHandleStateIfExist: Function;
 };
 
 export type TUserAssessmentListItemProps = {
-  assessment_id: string;
-  st_address: string;
+  assessment_id: string | null;
+  st_address: string | null;
   getUserAssessmentsAndHandleStateIfExist: Function;
 };
 
