@@ -1,4 +1,4 @@
-# my_block_counts
+# My Block Counts!
 
 ## environmental data collection app built with React Typescript, Node, and Sequelize  
 #
