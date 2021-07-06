@@ -1,34 +1,34 @@
 import { Router } from "express";
-import { AssessmentHandler, Authenticator } from "../typings";
+import { AssessmentHandler, User } from "../typings";
 
 const router = Router();
-const authenticator = new Authenticator();
+const user = new User();
 const assessmentHandler = new AssessmentHandler();
 
 router
   .get(
     "/user-assessments",
-    authenticator.isAuthenticated,
+    user.isAuthenticated,
     assessmentHandler.getUserAssessments
   )
   .get(
     "/get-user-assessment",
-    authenticator.isAuthenticated,
+    user.isAuthenticated,
     assessmentHandler.getUserAssessmentById
   )
   .post(
     "/new-assessment",
-    authenticator.isAuthenticated,
+    user.isAuthenticated,
     assessmentHandler.setNewAssessment
   )
   .put(
       "/update-user-assessment",
-      authenticator.isAuthenticated,
+      user.isAuthenticated,
       assessmentHandler.updateUserAssessment
   )
   .delete(
       "/delete-user-assessment",
-      authenticator.isAuthenticated,
+      user.isAuthenticated,
       assessmentHandler.deleteUserAssessment
   );
 

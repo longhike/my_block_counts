@@ -1,8 +1,22 @@
+import { useEffect } from "react";
 import { Col, Jumbotron, Row } from "react-bootstrap";
 import FadeIn from "react-fade-in";
+import { useDispatch, useSelector } from "react-redux";
+import { unsetCurrentAssessment } from "../../redux/actions";
 import Contact from "./Contact";
+import { IState } from "../../utils/typings/_interfaces"
 
 const About = () => {
+
+  const dispatch = useDispatch()
+
+  const curAssessId: string | null = useSelector(
+    (state: IState) => state.currentAssessment._id
+  );
+
+  useEffect(() => {
+    if (curAssessId) dispatch(unsetCurrentAssessment());
+  }, []);
   return (
     <FadeIn>
       <Jumbotron style={{ textAlign: "start" }}>

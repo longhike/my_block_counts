@@ -1,13 +1,14 @@
 import { useState, useEffect, ChangeEvent, FormEvent, MouseEvent } from "react";
 import axios, { AxiosResponse } from "axios";
 import { useSelector, useDispatch } from "react-redux";
-import { setCurrentAssessmentID } from "../../../redux/actions";
+import { setCurrentAssessment } from "../../../redux/actions";
 import { TInitialAssessmentSectionProps } from "../../../utils/typings/_types";
 import FadeIn from "react-fade-in";
 import { Button, Col, Form, Jumbotron, Row } from "react-bootstrap";
 import { ErrorFlag } from "../../../utils/ErrorFlag";
-import { IState } from "../../../utils/typings/_interfaces";
-import { TInitialAssessmentSectionResponse } from "../../../utils/typings/_types"
+import { PlacesInput } from "../../../utils/PlacesInput";
+import { ICurrentAssessment, IState } from "../../../utils/typings/_interfaces";
+import { TInitialAssessmentSectionResponse } from "../../../utils/typings/_types";
 import { useHistory } from "react-router";
 
 const InitialAssessmentSection = ({
@@ -18,13 +19,13 @@ const InitialAssessmentSection = ({
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<boolean>(false);
   const [buttonDisabled, setButtonDisabled] = useState<boolean>(false);
-  const currentAssessmentID: string | null = useSelector(
-    (state: IState) => state.currentAssessmentID
+  const currentAssessment: ICurrentAssessment = useSelector(
+    (state: IState) => state.currentAssessment
   );
   const userID = useSelector((state: IState) => state.user._id);
   const [responses, setResponses] = useState<TInitialAssessmentSectionResponse>(
     {
-      _id: currentAssessmentID || "",
+      _id: currentAssessment._id || "",
       user_id: userID || "",
       st_address: "",
       weather: "nice",
@@ -59,7 +60,7 @@ const InitialAssessmentSection = ({
     axios
       .get("/assessments/get-user-assessment", {
         params: {
-          _id: currentAssessmentID,
+          _id: currentAssessment._id,
         },
       })
       .then((response: AxiosResponse) => {
@@ -75,7 +76,7 @@ const InitialAssessmentSection = ({
   };
 
   const createOrUpdateSessionAndInitiate = async (): Promise<AxiosResponse> => {
-    if (!currentAssessmentID) {
+    if (!currentAssessment._id) {
       const response: AxiosResponse = await axios.post(
         "/assessments/new-assessment",
         responses
@@ -106,7 +107,7 @@ const InitialAssessmentSection = ({
   }, [responses.st_address]);
 
   useEffect(() => {
-    if (currentAssessmentID !== null) {
+    if (currentAssessment._id !== null) {
       getInitialDataAndHandleState();
     } else {
       setMessage("OK! First, let's get some general info out of the way.");
@@ -122,9 +123,9 @@ const InitialAssessmentSection = ({
           onSubmit={(e: FormEvent) => e.preventDefault()}
         >
           <FadeIn>
-            <div className={"initial-section-text-holder"} >
-              <h5>{message}</h5>
-              {currentAssessmentID ? (
+            <div className={"initial-section-text-holder"}>
+              <h4>{message}</h4>
+              {currentAssessment._id ? (
                 ""
               ) : (
                 <p>
@@ -149,6 +150,9 @@ const InitialAssessmentSection = ({
                   <Form.Label>
                     Enter the address closest to your vantage point
                   </Form.Label>
+                  {/* <PlacesInput
+                    
+                  /> */}
                   <Form.Control
                     name={"st_address"}
                     value={responses.st_address}
@@ -182,9 +186,8 @@ const InitialAssessmentSection = ({
                             e.stopPropagation();
                             setResponses({
                               ...responses,
-                              weather: e.currentTarget.getAttribute(
-                                "data-value"
-                              ),
+                              weather:
+                                e.currentTarget.getAttribute("data-value"),
                             });
                           }}
                         >
@@ -214,7 +217,7 @@ const InitialAssessmentSection = ({
                   } else {
                     createOrUpdateSessionAndInitiate().then(
                       (response: AxiosResponse) => {
-                        dispatch(setCurrentAssessmentID(response.data));
+                        dispatch(setCurrentAssessment(response.data));
                         setSessionInitiated((cur) => true);
                       }
                     );

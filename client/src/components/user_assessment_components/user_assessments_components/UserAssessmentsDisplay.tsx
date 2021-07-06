@@ -2,6 +2,7 @@ import {
   TUserAssessmentsDisplayProps,
   TUserAssessmentsResponseShape,
 } from "../../../utils/typings/_types";
+import { ICurrentAssessment } from "../../../utils/typings/_interfaces";
 import UserAssessmentListItem from "./UserAssessmentListItem";
 import FadeIn from "react-fade-in";
 import { useState } from "react";
@@ -17,7 +18,7 @@ const UserAssessmentsDisplay = ({
     <>
       <FadeIn>
         <div className={"user-assessment-items-holder"}>
-          {userAssessments.map((el: TUserAssessmentsResponseShape) => {
+          {userAssessments.map((el: ICurrentAssessment) => {
             return (
               <UserAssessmentListItem
                 key={el._id}

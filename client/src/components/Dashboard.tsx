@@ -1,6 +1,6 @@
 import { MouseEvent, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { unsetCurrentAssessmentID } from "../redux/actions";
+import { unsetCurrentAssessment } from "../redux/actions";
 import FadeIn from "react-fade-in";
 import { Card, Col, Jumbotron, Row } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
@@ -11,7 +11,7 @@ const Dashboard = () => {
   const dispatch = useDispatch()
   const username: string = useSelector((state: IState) => state.user.username!);
   useEffect(() => {
-    dispatch(unsetCurrentAssessmentID());
+    dispatch(unsetCurrentAssessment());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -46,9 +46,15 @@ const Dashboard = () => {
                 >
                   <p>update an assessment</p>
                 </Card>
-                <Card className={"dashboard-button disabled"}>
-                  <p>search MBC!</p>
+                <Card className={"dashboard-button"}
+                  onClick={(e:MouseEvent<HTMLElement>) => {
+                    e.preventDefault()
+                    history.push("/data")
+                  }}
+                >
+                  <p>data hub</p>
                 </Card>
+                
               </div>
             </Col>
           </Row>

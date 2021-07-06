@@ -18,10 +18,14 @@ type TUserAssessmentsShape = {
 export class AssessmentHandler {
   public async setNewAssessment(req: Request, res: Response) {
     try {
-      const _id = uuid();
-      const assessmentBody: TNewAssessmentShape = { ...req.body, _id };
+      const id = uuid();
+      const assessmentBody: TNewAssessmentShape = { ...req.body, _id: id };
       const newAssessment = await db.AssessmentModel.create(assessmentBody);
-      res.status(200).send(newAssessment.getDataValue("_id"));
+      const { _id, st_address } = newAssessment.get({
+        plain: true,
+      });
+      res.status(200).send({ _id, st_address });
+      // res.status(200).send(newAssessment.getDataValue("_id"));
     } catch (error) {
       console.log(error);
       res.status(500).send("create_error");
@@ -68,7 +72,7 @@ export class AssessmentHandler {
   public async updateUserAssessment(req: Request, res: Response) {
     try {
       const { _id, st_address, weather } = req.body;
-      const updatedAssessment = await db.AssessmentModel.update(
+      await db.AssessmentModel.update(
         {
           st_address,
           weather,
@@ -79,8 +83,7 @@ export class AssessmentHandler {
           },
         }
       );
-      console.log(updatedAssessment);
-      res.status(200).send(_id);
+      res.status(200).send({ _id, st_address });
     } catch (error) {
       console.log(error);
       res.status(500).send("failure");

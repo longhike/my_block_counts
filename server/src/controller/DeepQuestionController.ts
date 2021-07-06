@@ -1,24 +1,24 @@
 import { Router } from "express";
-import { DeepQuestionHandler, Authenticator } from "../typings";
+import { DeepQuestionHandler, User } from "../typings";
 
 const router = Router();
-const authenticator = new Authenticator();
+const user = new User();
 const deepQuestionHandler = new DeepQuestionHandler();
 
 router
   .get(
     "/get-deep-q-entry",
-    authenticator.isAuthenticated,
+    user.isAuthenticated,
     deepQuestionHandler.getDeepQuestionAnswer
   )
   .post(
     "/find-or-create-deep-q-row",
-    authenticator.isAuthenticated,
+    user.isAuthenticated,
     deepQuestionHandler.createNewDeepQuestionRowIfNotExists
   )
   .post(
     "/update-deep-q-entry",
-    authenticator.isAuthenticated,
+    user.isAuthenticated,
     deepQuestionHandler.updateDeepQuestionAnswer
   );
 

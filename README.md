@@ -15,6 +15,9 @@ As significant updates of this application are released, so to will the public c
 - React Redux
 - Axios
 - [React Fade-In](https://www.npmjs.com/package/react-fade-in)
+- [Google Maps Autocomplete API](https://developers.google.com/maps) *
+
+\* will be available in production on or around 7/15/2021
 
 ### Server & Database
 - Node.js / TypeScript
@@ -24,6 +27,21 @@ As significant updates of this application are released, so to will the public c
 - MySQL
 - NodeMailer
 - Sequelize
+
+## New in v2.5
+
+### data hub
+- currently available to authorized users; public access to be rolled out in v3
+- a hub for the various data visualization, manipulation, and exporting features that will be available in v3
+
+### refactored server and client
+
+### firmed up session persistence
+
+## Forthcoming in v3
+
+- expanded data hub, including map visualization
+- further security-oriented refactoring
 
 ## Contact
 

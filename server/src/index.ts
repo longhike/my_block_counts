@@ -1,11 +1,18 @@
 import express, { Express, RequestHandler } from "express";
 import session from "express-session";
 import { Server, TRouter } from "./typings";
-import { AuthController, AssessmentController, DeepQuestionController } from "./controller";
+import {
+  AuthController,
+  AssessmentController,
+  DataController,
+  DeepQuestionController,
+} from "./controller";
+import db from "./models";
 import passport from "passport";
+import SequelizeStore from "connect-session-sequelize"
 import * as dotenv from "dotenv";
 dotenv.config();
-
+const SessionStore = SequelizeStore((session.Store))
 const app: Express = express();
 
 const PORT: string | number = process.env.PORT || 3001;
@@ -14,8 +21,13 @@ const server: Server = new Server(PORT, app);
 
 const setSessionParams: RequestHandler = session({
   secret: process.env.SESSION_SECRET,
-  resave: true,
+  resave: false,
   saveUninitialized: true,
+  store: new SessionStore({
+    db: db.sequelize,
+    tableName: "session",
+  }),
+  
 });
 
 const middleware: any[] = [
@@ -33,12 +45,16 @@ const controllers: TRouter[] = [
   },
   {
     path: "/assessments",
-    controller: AssessmentController
+    controller: AssessmentController,
   },
   {
     path: "/assessments/deep-q",
-    controller: DeepQuestionController
-  }
+    controller: DeepQuestionController,
+  },
+  {
+    path: "/api",
+    controller: DataController,
+  },
 ];
 
 server.implementMiddleware(middleware);

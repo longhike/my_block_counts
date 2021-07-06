@@ -1,9 +1,9 @@
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios, { AxiosResponse } from "axios";
 import { Button, Form, Jumbotron } from "react-bootstrap";
 import FadeIn from "react-fade-in";
-import { setUser } from "../../redux/actions";
+import { setUser, unsetCurrentAssessment } from "../../redux/actions";
 import { ErrorFlag } from "../../utils/ErrorFlag";
 import { SuccessFlag } from "../../utils/SuccessFlag";
 import { IState, IUser } from "../../utils/typings/_interfaces";
@@ -144,6 +144,11 @@ const UpdateProfile = ({ getUserAndHandleState }: any) => {
         setButtonLoading((cur) => false);
       });
   };
+
+  useEffect(() => {
+    dispatch(unsetCurrentAssessment())
+  })
+
   return (
     <FadeIn>
       <Jumbotron>

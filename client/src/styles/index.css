@@ -58,15 +58,6 @@ label {
   width: 80%;
 }
 
-.auth-form .form-control {
-  background-color: rgba(0, 0, 0, 0);
-  border-top: none;
-  border-right: none;
-  border-left: none;
-  border-bottom: 2px solid rgb(113, 113, 113);
-  border-radius: 0px;
-}
-
 .auth-route-link {
   text-decoration: underline;
   transition: all 0.15s ease-in-out;
@@ -132,6 +123,42 @@ label {
   margin: auto;
 }
 
+.data-welcome {
+  text-align: left;
+}
+
+
+.data-assessment-detail-col {
+  margin: 0;
+  padding: 0;
+  max-height: 300px;
+  overflow: hidden scroll;
+}
+
+.data-assessment-detail-row {
+  background-color: var(--jumbotron-bg);
+}
+
+
+.data-assessment-detail-holder {
+  opacity: 1;
+  display: block;
+  transition: opacity .3s ease-in-out;
+}
+
+.data-assessment-detail-holder.hidden {
+  display: none;
+  opacity: 0;
+}
+
+.data-assessment-detail-tr-head {
+  border-bottom: 1px solid black
+}
+
+.data-assessment-detail-tr-body {
+  border-bottom: 1px solid var(--lighter-grey-bg)
+}
+
 .dashboard-button {
   background-color: var(--light-grey-bg);
   color: var(--lightest-grey);
@@ -162,7 +189,6 @@ label {
   color: var(--lighter-grey);
   background-color: var(--dark-grey-bg);
 }
-
 
 .dashboard-welcome {
   text-align: start;
@@ -224,6 +250,8 @@ label {
   background-color: var(--jumbotron-bg);
 }
 
+
+
 .deep-assessment-form {
   min-height: 60vh;
   padding-top: 2vh;
@@ -240,12 +268,22 @@ label {
   display: block;
 }
 
+
 .deep-assessment-section-set-holder.hidden {
   display: none;
 }
 
 .dive-in-button-holder {
   margin: 0;
+}
+
+.form-control {
+  background-color: rgba(0, 0, 0, 0);
+  border-top: none;
+  border-right: none;
+  border-left: none;
+  border-bottom: 2px solid rgb(113, 113, 113);
+  border-radius: 0px;
 }
 
 .form-control:focus {
@@ -315,6 +353,8 @@ label {
 }
 
 .jumbotron {
+  padding-top: 2.5%;
+  padding-bottom: 2%;
   margin-bottom: 0;
   border-radius: 0px !important;
   background-color: var(--jumbotron-bg);
@@ -407,11 +447,6 @@ label {
   margin: auto;
 }
 
-.question-holder .form-control {
-  background-color: rgba(0, 0, 0, 0);
-  border: none;
-}
-
 .question-text {
   text-align: start;
   font-size: large;
@@ -452,6 +487,15 @@ label {
   border: none;
 }
 
+.span-link {
+  color: rgb(192, 202, 255);
+  transition: color 0.2s ease-in-out;
+}
+
+.span-link:hover {
+  color: rgb(112, 134, 255);
+  cursor: pointer;
+}
 
 .user-assessment-list-item {
   margin-bottom: 3%;
@@ -512,6 +556,10 @@ label {
   .sidebar-list-item {
     display: inline-table;
     max-width: 25%;
+  }
+
+  .data-welcome:first-child {
+    text-align: center;
   }
 }
 

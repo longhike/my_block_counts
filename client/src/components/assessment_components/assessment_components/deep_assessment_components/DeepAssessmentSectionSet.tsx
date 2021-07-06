@@ -14,14 +14,14 @@ import Loading from "../../../../utils/Loading";
 import { deepAssessmentQuestionsRenderer } from "../../../../utils/_functions";
 import { Question } from "../../../../utils/typings/_classes";
 import { TDeepAssessmentSectionSetProps } from "../../../../utils/typings/_types";
-import { IState } from "../../../../utils/typings/_interfaces";
+import { ICurrentAssessment, IState } from "../../../../utils/typings/_interfaces";
 
 const DeepAssessmentSectionSet = ({
   set,
   table,
 }: TDeepAssessmentSectionSetProps) => {
-  const currentAssessmentID = useSelector(
-    (state: IState) => state.currentAssessmentID
+  const currentAssessment: ICurrentAssessment = useSelector(
+    (state: IState) => state.currentAssessment
   );
   const [currentIdx, setCurrentIdx] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
@@ -125,7 +125,7 @@ const DeepAssessmentSectionSet = ({
   useEffect(() => {
     if (!loading) {
       getDeepAssessmentAnswerIfExists(
-        currentAssessmentID!,
+        currentAssessment._id!,
         table,
         set[currentIdx].name
       )
@@ -148,7 +148,7 @@ const DeepAssessmentSectionSet = ({
   }, [currentIdx]);
 
   useEffect(() => {
-    getDeepAssessmentRowAndSetIfNotExists(table, currentAssessmentID!)
+    getDeepAssessmentRowAndSetIfNotExists(table, currentAssessment._id!)
       .then((res) => {
         setLoading((cur) => !cur);
       })
@@ -172,6 +172,7 @@ const DeepAssessmentSectionSet = ({
               {inProgress ? (
                 <>
                   {/* QUESTION TEXT ROW */}
+                  <h3>{currentAssessment.st_address}</h3>
                   <Row>
                     <Col className={"question-text"}>
                       <Form.Group>
@@ -239,7 +240,7 @@ const DeepAssessmentSectionSet = ({
                           setOrUpdateResponse(
                             set[currentIdx].name,
                             dataVal,
-                            currentAssessmentID!,
+                            currentAssessment._id!,
                             table
                           ).then((response) => {
                             if (currentIdx > 0) {
@@ -281,7 +282,7 @@ const DeepAssessmentSectionSet = ({
                           setOrUpdateResponse(
                             set[currentIdx].name,
                             dataVal,
-                            currentAssessmentID!,
+                            currentAssessment._id!,
                             table
                           ).then((response) => {
                             if (currentIdx < set.length - 1) {

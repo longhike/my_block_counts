@@ -12,6 +12,9 @@ import ForgotPassword from "./components/auth_components/ForgotPassword";
 import Main from "./components/Main";
 import Assessment from "./components/assessment_components/Assessment";
 import UserAssessments from "./components/user_assessment_components/UserAssessments";
+import DataMain from "./components/data_components/DataMain";
+import DataByAddress from "./components/data_components/DataByAddress"
+import MyData from "./components/data_components/MyData";
 import Loading from "./utils/Loading";
 import { IUser, IState } from "./utils/typings/_interfaces";
 import axios, { AxiosResponse } from "axios";
@@ -120,6 +123,15 @@ const App = () => {
                     ) : (
                       <Redirect to="/" />
                     )}
+                  </Route>
+                  <Route exact path="/data">
+                    <DataMain />
+                  </Route>
+                  <Route exact path="/data/by-address">
+                    <DataByAddress />
+                  </Route>
+                  <Route exact path="/data/my-data">
+                    {user._id !== null ? <MyData /> : <Redirect to="/data" />}
                   </Route>
                   <Route exact path="*">
                     <PageNotFound />
