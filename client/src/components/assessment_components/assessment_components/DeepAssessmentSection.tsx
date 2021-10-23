@@ -1,8 +1,8 @@
-import { MouseEvent, useState } from "react";
+import { useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import DeepAssessmentSectionSet from "./deep_assessment_components/DeepAssessmentSectionSet";
 import { AssessmentQuestions } from "../../../utils/_assessmentQuestions";
-import { SECTIONS, TABLE_NAME_LIST } from "../../../utils/data_map"
+import { SECTIONS, TABLE_NAME_LIST } from "../../../utils/data_utils/data_map"
 import Instructions from "../../instructions_components/Instructions";
 import AssessmentDisplaySidebar from "../../../utils/AssessmentDisplaySidebar"
 

@@ -2,12 +2,13 @@ import { useState, ChangeEvent, FormEvent, MouseEvent } from "react";
 import { useHistory } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/actions";
-import axios, { AxiosError, AxiosResponse } from "axios";
+import { login, signup } from "../../api/AuthRoutes";
 import { Button, Col, Form, Jumbotron, Row } from "react-bootstrap";
 import FadeIn from "react-fade-in";
 import { ErrorFlag } from "../../utils/ErrorFlag";
 import Loading from "../../utils/Loading";
-import { TSignupObj } from "../../utils/typings/_types";
+import { TAuthObj } from "../../utils/typings/_types";
+import { IUser } from "../../utils/typings/_interfaces";
 
 const Signup = () => {
   const history = useHistory();
@@ -36,40 +37,40 @@ const Signup = () => {
     const checkUsername = /^[a-zA-Z0-9]*$/;
     switch (kind) {
       case "username":
-        return checkUsername.test(value) && !(value.length < 4) && !(value.length > 20);
+        return (
+          checkUsername.test(value) &&
+          !(value.length < 4) &&
+          !(value.length > 20)
+        );
       case "email":
         return checkEmail.test(value);
-      case "password": 
+      case "password":
         return !(value.length < 8) && !(value.length > 50);
       default:
         return false;
     }
   };
 
-  const doLoginInSignupContext = (loginObj: TSignupObj): void => {
-    axios
-      .post("/auth/login", loginObj)
-      .then((response: AxiosResponse) => {
-        const user = response.data;
-        if (user.username) {
-          dispatch(setUser(user));
-        } else {
-          showError(
-            "Your account was created, but something went wrong in the login. Please try logging in."
-          );
-          setLoading((cur) => false);
-        }
-      })
-      .catch((err: AxiosError) => {
-        console.log(err.response);
+  const doLoginInSignupContext = async (loginObj: TAuthObj): Promise<any> => {
+    try {
+      const _user: IUser = await login(loginObj);
+      if (_user.username) return dispatch(setUser(_user));
+      else {
         showError(
           "Your account was created, but something went wrong in the login. Please try logging in."
         );
         setLoading((cur) => false);
-      });
+      }
+    } catch (error: any) {
+      console.log(error.response);
+      showError(
+        "Your account was created, but something went wrong in the login. Please try logging in."
+      );
+      setLoading((cur) => false);
+    }
   };
 
-  const doSignup = (): void => {
+  const doSignup = async () => {
     destroyError();
     setLoading((cur) => true);
     if (
@@ -97,42 +98,37 @@ const Signup = () => {
       );
       setLoading((cur) => false);
     } else {
-      const signupObj: TSignupObj = {
+      const signupObj: TAuthObj = {
         username: usernameTry.toLowerCase().trim(),
         email: emailTry.toLowerCase().trim(),
         password: passwordTry,
       };
-      axios
-        .post("/auth/signup", signupObj)
-        .then((response: AxiosResponse) => {
-          if (response.data === "success") {
-            doLoginInSignupContext(signupObj);
-          } else {
-            showError(
-              "Oh dear. Something went wrong. Please refresh and try again."
-            );
-            setLoading((cur) => false);
-          }
-        })
-        .catch((err: AxiosError) => {
-          const error = err.response!;
+      try {
+        const response: string = await signup(signupObj);
+        if (response === "success") return doLoginInSignupContext(signupObj);
+        else {
+          throw response;
+        }
+      } catch (err: any) {
+        const error = err.response!;
+        console.log(error)
           switch (error.status) {
             case 400:
               showError(
-                error.data === "email"
+                error.data.error[0] === "email"
                   ? "That e-mail's already in use. If you already have an account, please sign in."
                   : "That username's already taken. Please choose another, or sign in if you already have an account."
               );
               break;
             default:
-              console.log("oy vey,");
+              console.log("oy vey");
               showError(
                 "Oh dear. Something went wrong. Please reload the page and try again."
               );
               break;
           }
           setLoading((cur) => false);
-        });
+      }
     }
   };
 

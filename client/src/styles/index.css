@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;500&display=swap");
 
 :root {
+  --app-bg: rgb(116, 175, 196);
   --button-success: rgba(0, 203, 115, 0.9);
   --button-fail: rgb(203, 0, 47);
   --button-login: rgb(0, 150, 103);
@@ -30,7 +31,7 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  background-color: var(--dark-grey-bg);
+  background-color: var(--app-bg);
 }
 
 code {
@@ -250,8 +251,6 @@ label {
   background-color: var(--jumbotron-bg);
 }
 
-
-
 .deep-assessment-form {
   min-height: 60vh;
   padding-top: 2vh;
@@ -360,6 +359,10 @@ label {
   background-color: var(--jumbotron-bg);
 }
 
+.leaflet-container {
+  height: 380px;
+}
+
 .logo {
   min-height: 60px;
   min-width: 60px;
@@ -382,6 +385,32 @@ label {
   overflow: hidden scroll;
 }
 
+.map-pin {
+  background: rgba(0, 203, 115, 0.9);
+  border-radius: 50%;
+}
+
+.modal-content {
+  background-color: rgba(212, 212, 212, 0.705);
+  background-color: rgba(0, 0, 0, 0);
+  border: none;
+}
+
+.modal-header {
+  
+  border: none;
+}
+
+.modal-header > button > span {
+  font-size: larger;
+  color:rgb(255, 255, 255)
+}
+
+.modal-body {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .navbar {
   background-color: rgba(73, 73, 73, 0);
   z-index: 1;
@@ -391,6 +420,7 @@ label {
 
 .navbar.with-bg {
   background-color: rgba(73, 73, 73, 0.75) !important;
+  z-index: 3;
 }
 
 .navbar-nav {
@@ -428,6 +458,22 @@ label {
   margin: auto;
   height: 55px;
   width: 55px;
+}
+
+.previous {
+  z-index: 2;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #f1f1f1;
+  color: black;
+  border-radius: 50%;
+}
+
+.previous:hover {
+  background-color: #ddd;
 }
 
 .progress {
@@ -517,9 +563,6 @@ label {
 .user-assessment-list-items-holder {
   height: 50vh;
   overflow: hidden scroll;
-}
-
-.weather-items-holder {
 }
 
 .weather-item {

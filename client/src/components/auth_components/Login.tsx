@@ -2,12 +2,13 @@ import { useState, ChangeEvent, FormEvent, MouseEvent } from "react";
 import { useHistory } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/actions";
-import axios, { AxiosError, AxiosResponse } from "axios";
+import { login } from "../../api/AuthRoutes";
 import { Button, Col, Form, Jumbotron, Row } from "react-bootstrap";
 import FadeIn from "react-fade-in";
 import { ErrorFlag } from "../../utils/ErrorFlag";
 import Loading from "../../utils/Loading";
-import { TLoginObj } from "../../utils/typings/_types";
+import { TAuthObj } from "../../utils/typings/_types";
+import { IUser } from "../../utils/typings/_interfaces";
 
 const Login = () => {
   const history = useHistory();
@@ -28,7 +29,7 @@ const Login = () => {
     setError((cur) => false);
   };
 
-  const doLogin = (): void => {
+  const doLogin = async () => {
     destroyError();
     setLoading((cur) => true);
     if (usernameTry.length <= 0 || passwordTry.length <= 0) {
@@ -36,29 +37,30 @@ const Login = () => {
       setLoading((cur) => false);
       return;
     }
-    const loginObj: TLoginObj = {
+    const loginObj: TAuthObj = {
       username: usernameTry.toLowerCase().trim(),
       password: passwordTry,
     };
-    axios
-      .post("/auth/login", loginObj)
-      .then(({ data }: AxiosResponse) => {
-        dispatch(setUser(data));
-        history.push("/");
-      })
-      .catch((error: AxiosError) => {
-        switch (error.response!.status) {
-          case 401:
-            showError(
-              "Sorry, that credential combination wasn't recognized. Please make sure your inputs are correct and try again."
-            );
-            break;
-          default:
-            showError("Oy vey, something went wrong... please try again.");
-            break;
-        }
-        setLoading((cur) => false);
-      });
+    try {
+      const response: IUser = await login(loginObj);
+      if (!response._id) {
+        throw response;
+      }
+      dispatch(setUser(response));
+      history.push("/");
+    } catch (error: any) {
+      switch (error.response!.status) {
+        case 401:
+          showError(
+            "Sorry, that credential combination wasn't recognized. Please make sure your inputs are correct and try again."
+          );
+          break;
+        default:
+          showError("Oy vey, something went wrong... please try again.");
+          break;
+      }
+      setLoading((cur) => false);
+    }
   };
 
   return (

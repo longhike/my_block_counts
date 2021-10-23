@@ -1,8 +1,7 @@
 import {
   TUserAssessmentsDisplayProps,
-  TUserAssessmentsResponseShape,
 } from "../../../utils/typings/_types";
-import { ICurrentAssessment } from "../../../utils/typings/_interfaces";
+import { IAssessmentIdAddress } from "../../../utils/typings/_interfaces";
 import UserAssessmentListItem from "./UserAssessmentListItem";
 import FadeIn from "react-fade-in";
 import { useState } from "react";
@@ -12,13 +11,15 @@ const UserAssessmentsDisplay = ({
   userAssessments,
   getUserAssessmentsAndHandleStateIfExist,
 }: TUserAssessmentsDisplayProps) => {
+  // eslint-disable-next-line
   const [error, setError] = useState<boolean>(false)
+  // eslint-disable-next-line
   const [errorMessage, setErrorMessage] = useState<string>("")
   return (
     <>
       <FadeIn>
         <div className={"user-assessment-items-holder"}>
-          {userAssessments.map((el: ICurrentAssessment) => {
+          {userAssessments.map((el: IAssessmentIdAddress) => {
             return (
               <UserAssessmentListItem
                 key={el._id}

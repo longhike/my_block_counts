@@ -82,10 +82,10 @@ export class DeepQuestionHandler {
     res: Response
   ): Promise<Response> {
     try {
-      const { assessment_id, col, data, table } = req.body;
+      const { assessment_id, col, value, table } = req.body;
       await translator[table].update(
         {
-          [col]: data,
+          [col]: value,
         },
         {
           where: {

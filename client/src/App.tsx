@@ -13,25 +13,27 @@ import Main from "./components/Main";
 import Assessment from "./components/assessment_components/Assessment";
 import UserAssessments from "./components/user_assessment_components/UserAssessments";
 import DataMain from "./components/data_components/DataMain";
-import DataByAddress from "./components/data_components/DataByAddress"
+import DataByAddress from "./components/data_components/DataByAddress";
 import MyData from "./components/data_components/MyData";
 import Loading from "./utils/Loading";
 import { IUser, IState } from "./utils/typings/_interfaces";
-import axios, { AxiosResponse } from "axios";
+import { logout, getUserIfAuthenticated } from "./api/AuthRoutes";
 import PageNotFound from "./utils/PageNotFound";
 import About from "./components/about_components/About";
+import DataMap from "./components/data_components/DataMap";
 
 const App = () => {
   const user: IUser = useSelector((state: IState) => state.user);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(true);
-  const location = window.location.origin;
 
   const getUserAndHandleState = async (): Promise<void> => {
     try {
-      const response: AxiosResponse = await axios.get(`${location}/auth`);
-      const _user: IUser = response.data;
-      if (_user._id) dispatch(setUser(_user));
+      const response: IUser = await getUserIfAuthenticated();
+      if (!response._id) {
+        throw response;
+      }
+      dispatch(setUser(response));
       setLoading(false);
     } catch (error: any) {
       const { status } = error.response;
@@ -46,9 +48,7 @@ const App = () => {
           console.log("something went wrong, not 401 or 500");
           console.log(error.message);
       }
-      if (user._id !== null || user.username !== null || user.email !== null) {
-        dispatch(unsetUser());
-      }
+      dispatch(unsetUser());
       setLoading(false);
     }
   };
@@ -56,10 +56,15 @@ const App = () => {
   const signOutUserAndHandleState = async (): Promise<void> => {
     setLoading(true);
     try {
-      await axios.get("/auth/logout");
-      getUserAndHandleState();
-    } catch (error) {
+      const success = await logout();
+      if (success) {
+        getUserAndHandleState();
+      } else {
+        throw new Error("failed");
+      }
+    } catch (error: any) {
       console.log(error.message);
+      setLoading(false);
     }
   };
 
@@ -114,6 +119,9 @@ const App = () => {
                       <Redirect to="/" />
                     )}
                   </Route>
+                  <Route exact path="/assessment/:assessment_id">
+                    {user._id !== null ? <Assessment /> : <Redirect to="/" />}
+                  </Route>
                   <Route exact path="/assessment">
                     {user._id !== null ? <Assessment /> : <Redirect to="/" />}
                   </Route>
@@ -129,6 +137,9 @@ const App = () => {
                   </Route>
                   <Route exact path="/data/by-address">
                     <DataByAddress />
+                  </Route>
+                  <Route exact path="/data/map">
+                    <DataMap />
                   </Route>
                   <Route exact path="/data/my-data">
                     {user._id !== null ? <MyData /> : <Redirect to="/data" />}

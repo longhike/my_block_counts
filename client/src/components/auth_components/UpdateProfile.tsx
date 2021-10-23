@@ -1,13 +1,14 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import axios, { AxiosResponse } from "axios";
+import { getUserIfAuthenticated, updateUserInfo } from "../../api/AuthRoutes";
 import { Button, Form, Jumbotron } from "react-bootstrap";
 import FadeIn from "react-fade-in";
 import { setUser, unsetCurrentAssessment } from "../../redux/actions";
 import { ErrorFlag } from "../../utils/ErrorFlag";
 import { SuccessFlag } from "../../utils/SuccessFlag";
 import { IState, IUser } from "../../utils/typings/_interfaces";
-import { TPasswordUpdate, TUpdatedUser } from "../../utils/typings/_types";
+import { TPasswordUpdateShape, TUpdatedUser } from "../../utils/typings/_types";
+import BackButton from "../../utils/BackButton";
 
 const UpdateProfile = ({ getUserAndHandleState }: any) => {
   const user: IUser = useSelector((state: IState) => state.user);
@@ -16,7 +17,7 @@ const UpdateProfile = ({ getUserAndHandleState }: any) => {
   const [cols, setCols] = useState<string[]>([]);
   const [username, setUsername] = useState<string>(user.username!);
   const [email, setEmail] = useState<string>(user.email!);
-  const [passwordUpdate, setPasswordUpdate] = useState<TPasswordUpdate>({
+  const [passwordUpdate, setPasswordUpdate] = useState<TPasswordUpdateShape>({
     currentPassword: "",
     newPassword: "",
     confirmNewPassword: "",
@@ -58,12 +59,12 @@ const UpdateProfile = ({ getUserAndHandleState }: any) => {
     setError(false);
   };
 
-  const getUserInfoAndSetState = async (): Promise<any> => {
+  const getUserInfoAndSetState = async (): Promise<void> => {
     try {
-      const { data }: AxiosResponse = await axios.get("/auth/user");
-      dispatch(setUser(data))
+      const _user: IUser = await getUserIfAuthenticated();
+      dispatch(setUser(_user));
       return;
-    } catch (error) {}
+    } catch (error: any) {}
   };
 
   const resetFields = () => {
@@ -77,7 +78,7 @@ const UpdateProfile = ({ getUserAndHandleState }: any) => {
     getUserInfoAndSetState();
   };
 
-  const validateInputsAndUpdateUser = (cols: string[], _id: string) => {
+  const validateInputsAndUpdateUser = async (cols: string[], _id: string) => {
     setButtonLoading((cur) => true);
     const updatedUser: TUpdatedUser = {
       _id,
@@ -117,10 +118,12 @@ const UpdateProfile = ({ getUserAndHandleState }: any) => {
       }
       updatedUser.password = passwordUpdate;
     }
-    axios
-      .put("/auth/update-user", { cols, user: updatedUser })
-      .then(({ data }) => {
-        if (data === "success") getUserAndHandleState();
+    try {
+      const success = await updateUserInfo(cols, updatedUser);
+      if (!success) {
+        throw success;
+      } else {
+        getUserAndHandleState();
         setSuccessMessage("success!");
         setSuccess((cur) => true);
         setButtonLoading((cur) => false);
@@ -129,27 +132,29 @@ const UpdateProfile = ({ getUserAndHandleState }: any) => {
           setSuccess((cur) => false);
           setSuccessMessage("");
         }, 2000);
-      })
-      .catch((err) => {
-        console.log(err.message);
-        switch (err.response.status) {
-          case 400:
-            setErrorMessage("your original password is incorrect");
-            break;
-          default:
-            setErrorMessage("Oops - something went wrong");
-            break;
-        }
-        setError(true);
-        setButtonLoading((cur) => false);
-      });
+      }
+    } catch (error: any) {
+      console.log(error.message);
+      switch (error.response.status) {
+        case 400:
+          setErrorMessage("your original password is incorrect");
+          break;
+        default:
+          setErrorMessage("Oops - something went wrong");
+          break;
+      }
+      setError(true);
+      setButtonLoading((cur) => false);
+    }
   };
 
   useEffect(() => {
-    dispatch(unsetCurrentAssessment())
-  })
+    dispatch(unsetCurrentAssessment());
+  });
 
   return (
+    <>
+    <BackButton prev={""} />
     <FadeIn>
       <Jumbotron>
         <Form
@@ -239,6 +244,7 @@ const UpdateProfile = ({ getUserAndHandleState }: any) => {
         </Form>
       </Jumbotron>
     </FadeIn>
+    </>
   );
 };
 

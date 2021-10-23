@@ -82,7 +82,7 @@ export class Authenticator {
         itemFailed = itemFailed.split(".")[1];
       }
       const howFailed = error.errors[0].validatorKey;
-      return res.status(500).json({ error: [itemFailed, howFailed] });
+      return res.status(400).json({ error: [itemFailed, howFailed] });
     }
   }
 

@@ -49,6 +49,22 @@ export class DataHandler {
     }
   }
 
+  public async getAllAssessments(req: Request, res: Response) {
+    try {
+      const data = await db.AssessmentModel.findAll({
+        attributes: {
+          exclude: ["createdAt", "updatedAt", "user_id", "weather"],
+        },
+      });
+      const result = data.map((d) => d.get({ plain: true }));
+      DataHandler.updateDataListCoordinatesToFloat(result);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.log(error.message);
+      return res.status(500).send("server_error");
+    }
+  }
+
   public async getAssessmentDetailByTableAndID(req: Request, res: Response) {
     try {
       const { _id, table } = req.query;
@@ -64,7 +80,7 @@ export class DataHandler {
           ],
         },
       });
-      if (!data[0]) return res.status(200).send([])
+      if (!data[0]) return res.status(200).send([]);
       const qMap = COLUMN_QUESTION_MAP[table as string];
       const set = data[0].dataValues;
       return res.status(200).json(
@@ -78,6 +94,40 @@ export class DataHandler {
     } catch (error) {
       console.log(error.message);
       return res.status(500).send("server_error");
+    }
+  }
+
+  public async getAvailableFilters(req: Request, res: Response) {
+    const response = {};
+    const { kind } = req.params;
+    const parsed = kind.split("-");
+    const raw: any[] = await db.AssessmentModel.findAll({
+      attributes: parsed,
+    });
+    raw.forEach(({ dataValues }) => {
+      for (const key in dataValues) {
+        if (!response.hasOwnProperty(key)) {
+          response[key] = new Set();
+          response[key].add(dataValues[key]);
+        } else {
+          response[key].add(dataValues[key]);
+        }
+      }
+    });
+    for (const key in response) {
+      response[key] = Array.from(response[key]);
+    }
+    res.json(response);
+  }
+
+  private static updateDataListCoordinatesToFloat(list: any[]): void {
+    for (let i = 0; i < list.length; i++) {
+      const current = list[i];
+      const updatedCoordinates = JSON.parse(current.coordinates).map((c) =>
+        parseFloat(c)
+      );
+      current.coordinates = updatedCoordinates;
+      list[i] = current;
     }
   }
 }

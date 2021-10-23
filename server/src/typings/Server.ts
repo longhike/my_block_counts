@@ -54,8 +54,8 @@ export default class Server {
       this.listen();
     } catch (error) {
       console.error("connection failed!");
-      console.error(error);
-      process.exit(0);
+      console.error(error.message);
+      process.exitCode = 1;
     }
   }
 }

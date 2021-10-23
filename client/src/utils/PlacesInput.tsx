@@ -1,82 +1,97 @@
 import {
   useEffect,
   useState,
+  ChangeEvent,
 } from "react";
 import GooglePlacesAutocomplete, {
   geocodeByAddress,
-  getLatLng
+  getLatLng,
 } from "react-google-places-autocomplete";
 import { Form } from "react-bootstrap";
-import Loading from "./Loading";
+import { TPlacesResponse, TLatLng, TParsedAddressShape, TPlacesInputProps } from "./typings/_types";
 
-type TPlacesResponse = {
-    label?: string;
-    value?: object;
-}
-
-type TLatLong = {
-    lat?: string;
-    lng?: string;
-}
-
-export const PlacesInput = () => {
-    const [loaded, setLoaded] = useState<boolean>(false)
-  const [currentQuery, setCurrentQuery] = useState<TPlacesResponse>({
-      label: "",
-      value: {}
+export const PlacesInput = ({ responses, setResponses }: TPlacesInputProps) => {
+  const [parsed, setParsed] = useState<TParsedAddressShape>({
+    number: "",
+    street: "",
+    neighborhood: "",
+    city: "",
+    state: "",
+    country: "",
+    zip: "",
   });
-  const [streetAddress, setStreetAddress] = useState<string>("")
-  const [coordinates, setCoordinates] = useState<TLatLong>({
-      lat: "",
-      lng: ""
-  })
-
-  const implementPlacesScript = () => {
-      if (!document.getElementById("places_script")) {
-          
+ 
+  const parseAddressAndHandleParsedAddressedState = (arr: google.maps.GeocoderAddressComponent[]): void => {
+    const newOne: any = {};
+    for (let i = 0; i < arr.length; i++) {
+      const { short_name, types } = arr[i];
+      for (let j = 0; j < types.length; j++) {
+        switch (types[j]) {
+          case "street_number":
+            newOne.number = short_name;
+            break;
+          case "route":
+            newOne.street = short_name;
+            break;
+          case "neighborhood":
+            newOne.neighborhood = short_name;
+            break;
+          case "locality":
+            newOne.city = short_name;
+            break;
+          case "administrative_area_level_1":
+            newOne.state = short_name;
+            break;
+          case "country":
+            newOne.country = short_name;
+            break;
+          case "postal_code":
+            newOne.zip = short_name;
+            break;
+          default:
+            break;
+        }
       }
-  }
+    }
+    setParsed({ ...parsed, ...newOne });
+  };
+
+  const handleSelection = async (v: TPlacesResponse, e: ChangeEvent): Promise<void> => {
+    if (v && v.label) {
+      const [geoResponse]: google.maps.GeocoderResult[] =
+        await geocodeByAddress(v.label);
+      const { lat, lng }: TLatLng = await getLatLng(geoResponse);
+      setResponses({
+        ...responses,
+        st_address: geoResponse.formatted_address,
+        coordinates: JSON.stringify([lat.toString(), lng.toString()]),
+      });
+      parseAddressAndHandleParsedAddressedState(geoResponse.address_components);
+    }
+  };
 
   useEffect(() => {
-    console.log(coordinates)
-  }, [coordinates])
-
-  useEffect(() => {
-      const fetchLatLong = async () => {
-        if (currentQuery && currentQuery.label && currentQuery.label.length > 0) {
-            setStreetAddress(currentQuery.label)
-            const geocodeResponse = await geocodeByAddress(currentQuery.label)
-            const { lat, lng } = await getLatLng(geocodeResponse[0])
-            setCoordinates({
-                ...coordinates,
-                lat: lat.toString(),
-                lng: lng.toString()
-            })
-          }
-      }
-      fetchLatLong()
-  }, [currentQuery])
+    setResponses({ ...responses, ...parsed });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parsed]);
 
   return (
     <Form.Group>
-        {loaded ? <GooglePlacesAutocomplete
+      <GooglePlacesAutocomplete
         selectProps={{
-          value: currentQuery,
-          onChange: (newPlace:TPlacesResponse) => {
-              setCurrentQuery({
-                  ...currentQuery,
-                  ...newPlace
-              })
-          },
+          value: responses.st_address,
+          placeholder: "Enter address closest to your vantage point",
+          onChange: handleSelection,
+          isClearable: true,
           styles: {
             option: (provided: any) => ({
               ...provided,
               textAlign: "left",
             }),
           },
+          withSessionToken: true
         }}
-      /> : <Loading />}
-      
+      />
     </Form.Group>
   );
 };

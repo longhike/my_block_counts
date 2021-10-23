@@ -1,6 +1,6 @@
-import { Dispatch, useState, ChangeEvent, FormEvent } from "react";
-import axios from "axios";
+import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useState } from "react";
 import { useHistory } from "react-router-dom";
+import { forgotPassword, resetPassword } from "../../api/AuthRoutes";
 import { Button, Form, Jumbotron } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { ErrorFlag } from "../../utils/ErrorFlag";
@@ -8,30 +8,19 @@ import { TPasswordResetParams } from "../../utils/typings/_types";
 
 const sendNewEmail = async (
   email: string,
-  setHeaderState: Dispatch<React.SetStateAction<string>>
+  setHeaderState: Dispatch<SetStateAction<string>>
 ) => {
   setHeaderState(". . .");
   try {
-    const success = await axios.post("/auth/forgot-password", { email });
+    const success: boolean = await forgotPassword({ email });
     if (success)
       setHeaderState(
         "OK, check your email!\n\nIf you don't see an email from us in your inbox, check your spam folder. If you don't receive any email at all, make sure you have an account, or reach out to us by going to the About section and sending us a message."
       );
-  } catch (error) {
+    else throw success;
+  } catch (error: any) {
     console.log(error);
     setHeaderState("Oh dear. Something went wrong...");
-  }
-};
-
-const resetPassword = async (session: string, password: string) => {
-  try {
-    const { data } = await axios.post("/auth/reset-password", {
-      session,
-      password,
-    });
-    return data;
-  } catch (error) {
-    console.log(error);
   }
 };
 
@@ -65,7 +54,7 @@ const InputEmailAndGetLink = () => {
   );
 };
 
-const ResetPasswordAndSignIn = (id: string) => {
+const ResetPassword = (id: string) => {
   const history = useHistory();
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [error, setError] = useState<boolean>(false);
@@ -89,10 +78,11 @@ const ResetPasswordAndSignIn = (id: string) => {
             );
           else {
             setHeader(". . .");
-            const success = await resetPassword(id, password);
-            if (success === "success") history.push("/login");
+            const success: boolean = await resetPassword({ session: id, password });
+            if (success) history.push("/login");
+            else throw new Error("failed")
           }
-        } catch (error) {
+        } catch (error: any) {
           setErrorMessage(error.message);
           setError((cur) => true);
         }
@@ -132,9 +122,7 @@ const ResetPasswordAndSignIn = (id: string) => {
 const ForgotPassword = () => {
   const { id }: TPasswordResetParams = useParams();
   return (
-    <Jumbotron>
-      {id ? ResetPasswordAndSignIn(id) : InputEmailAndGetLink()}
-    </Jumbotron>
+    <Jumbotron>{id ? ResetPassword(id) : InputEmailAndGetLink()}</Jumbotron>
   );
 };
 

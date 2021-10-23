@@ -1,18 +1,20 @@
 import express, { Express, RequestHandler } from "express";
 import session from "express-session";
-import { Server, TRouter } from "./typings";
+import passport from "passport";
+import SequelizeStore from "connect-session-sequelize";
+import compression from "compression";
+import * as dotenv from "dotenv";
+import db from "./models";
 import {
   AuthController,
   AssessmentController,
   DataController,
   DeepQuestionController,
 } from "./controller";
-import db from "./models";
-import passport from "passport";
-import SequelizeStore from "connect-session-sequelize"
-import * as dotenv from "dotenv";
+import { Server, TRouter } from "./typings";
+
 dotenv.config();
-const SessionStore = SequelizeStore((session.Store))
+const SessionStore = SequelizeStore(session.Store);
 const app: Express = express();
 
 const PORT: string | number = process.env.PORT || 3001;
@@ -27,10 +29,10 @@ const setSessionParams: RequestHandler = session({
     db: db.sequelize,
     tableName: "session",
   }),
-  
 });
 
 const middleware: any[] = [
+  compression(),
   express.json(),
   express.urlencoded({ extended: true }),
   setSessionParams,

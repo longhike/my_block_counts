@@ -1,5 +1,4 @@
 import { MouseEvent, FormEvent, useEffect, useState } from "react";
-import axios, { AxiosError, AxiosResponse } from "axios";
 import { useSelector } from "react-redux";
 import FadeIn from "react-fade-in";
 import {
@@ -13,14 +12,25 @@ import {
 import Loading from "../../../../utils/Loading";
 import { deepAssessmentQuestionsRenderer } from "../../../../utils/_functions";
 import { Question } from "../../../../utils/typings/_classes";
-import { TDeepAssessmentSectionSetProps } from "../../../../utils/typings/_types";
-import { ICurrentAssessment, IState } from "../../../../utils/typings/_interfaces";
+import {
+  TDeepAssessmentSectionSetProps,
+  TDeepAssessmentQueryShape,
+} from "../../../../utils/typings/_types";
+import {
+  IAssessmentIdAddress,
+  IState,
+} from "../../../../utils/typings/_interfaces";
+import {
+  findOrCreateDeepQRow,
+  getDeepAssessmentAnswerIfExists,
+  updateDeepAssessmentAnswer,
+} from "../../../../api/DeepAssessmentRoutes";
 
 const DeepAssessmentSectionSet = ({
   set,
   table,
 }: TDeepAssessmentSectionSetProps) => {
-  const currentAssessment: ICurrentAssessment = useSelector(
+  const currentAssessment: IAssessmentIdAddress = useSelector(
     (state: IState) => state.currentAssessment
   );
   const [currentIdx, setCurrentIdx] = useState<number>(0);
@@ -55,54 +65,77 @@ const DeepAssessmentSectionSet = ({
     }
   };
 
-  const getDeepAssessmentRowAndSetIfNotExists = async (
-    table: string,
-    assessment_id: string
-  ): Promise<AxiosResponse> => {
-    const obj = { table, assessment_id };
-    const response: AxiosResponse = await axios.post(
-      "/assessments/deep-q/find-or-create-deep-q-row",
-      obj
-    );
-    return response;
+  const setDeepAssessmentEnvironment = async (): Promise<void> => {
+    try {
+      await findOrCreateDeepQRow({
+        table,
+        assessment_id: currentAssessment._id!,
+      });
+      setLoading((cur) => !cur);
+    } catch (error) {
+      console.error("whoops");
+      setLoading((cur) => !cur);
+    }
   };
 
-  const getDeepAssessmentAnswerIfExists = async (
-    assessment_id: string,
-    table: string,
-    col: string
-  ): Promise<AxiosResponse> => {
-    const paramObj = {
-      assessment_id,
-      table,
-      col,
-    };
-    const response: AxiosResponse = await axios.get(
-      "/assessments/deep-q/get-deep-q-entry",
-      {
-        params: paramObj,
+  const handleResponseAndIteration = async (backOrNext: number) => {
+    try {
+      if (!inProgress) setInProgress((cur) => !cur);
+      if (backOrNext === 1) {
+        setNextButtonDisabled(true);
+        setNextButtonText((cur) => "...");
+      } else {
+        setBackButtonDisabled(true);
+        setBackButtonText((cur) => "...");
       }
-    );
-    return response;
-  };
+      const dataVal: string =
+        set[currentIdx].answerType === "counter"
+          ? counterVal.toString()
+          : stringVal;
+      const query: TDeepAssessmentQueryShape = {
+        assessment_id: currentAssessment._id!,
+        table,
+        col: set[currentIdx].name,
+        value: dataVal,
+      };
+      await updateDeepAssessmentAnswer(query);
+      if (backOrNext === 1) {
+        if (currentIdx < set.length - 1) {
+          if (currentIdx <= set.length - 2) {
+            setNextButtonDisabled(false);
+          }
+          setCurrentIdx((cur) => cur + 1);
+          if (backButtonDisabled) {
+            setBackButtonDisabled(false);
+          }
+          setStringVal((cur) => "");
+          setCounterVal((cur) => 0);
+          setNextButtonText((cur) => "next");
+        } else {
+          setNextButtonDisabled(true);
+          setNextButtonText((cur) => "next");
+          setInProgress((cur) => !cur);
+        }
+      } else {
+        if (currentIdx > 0) {
+          if (currentIdx > 1) {
+            setBackButtonDisabled(false);
+          }
+          setCurrentIdx((cur) => cur - 1);
+          if (nextButtonDisabled) {
+            setNextButtonDisabled(false);
+          }
 
-  const setOrUpdateResponse = async (
-    col: string,
-    value: string,
-    assessment_id: string,
-    table: string
-  ): Promise<AxiosResponse> => {
-    const obj = {
-      col: col,
-      data: value,
-      assessment_id: assessment_id,
-      table: table,
-    };
-    const response = await axios.post(
-      "/assessments/deep-q/update-deep-q-entry",
-      obj
-    );
-    return response;
+          setBackButtonText((cur) => "back");
+        }
+      }
+      setStringVal((cur) => "");
+      setCounterVal((cur) => 0);
+    } catch (error) {
+      console.log(error)
+      setNextButtonDisabled(true);
+      setBackButtonDisabled(true);
+    }
   };
 
   const setStateFromResponse = (response: string | null): void => {
@@ -122,18 +155,23 @@ const DeepAssessmentSectionSet = ({
     }
   };
 
+  const setAnswer = async () => {
+    try {
+      const query: TDeepAssessmentQueryShape = {
+        assessment_id: currentAssessment._id!,
+        table,
+        col: set[currentIdx].name,
+      };
+      const answer = await getDeepAssessmentAnswerIfExists(query);
+      if (answer) setStateFromResponse(answer[set[currentIdx].name]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     if (!loading) {
-      getDeepAssessmentAnswerIfExists(
-        currentAssessment._id!,
-        table,
-        set[currentIdx].name
-      )
-        .then((response: AxiosResponse) => {
-          const answer = response.data;
-          if (answer) setStateFromResponse(answer[set[currentIdx].name]);
-        })
-        .catch((err: AxiosError) => console.log(err.message));
+      setAnswer();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIdx, loading]);
@@ -148,14 +186,8 @@ const DeepAssessmentSectionSet = ({
   }, [currentIdx]);
 
   useEffect(() => {
-    getDeepAssessmentRowAndSetIfNotExists(table, currentAssessment._id!)
-      .then((res) => {
-        setLoading((cur) => !cur);
-      })
-      .catch((err) => {
-        console.error("whoops");
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    setDeepAssessmentEnvironment();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -227,35 +259,9 @@ const DeepAssessmentSectionSet = ({
                         className={"deep-assessment-button"}
                         variant={"warning"}
                         disabled={backButtonDisabled}
-                        onClick={(e: MouseEvent<HTMLElement>) => {
+                        onClick={async (e: MouseEvent<HTMLElement>) => {
                           e.preventDefault();
-                          setBackButtonDisabled(true);
-                          setBackButtonText((cur) => "...");
-                          let dataVal;
-                          if (set[currentIdx].answerType === "counter") {
-                            dataVal = counterVal.toString();
-                          } else {
-                            dataVal = stringVal;
-                          }
-                          setOrUpdateResponse(
-                            set[currentIdx].name,
-                            dataVal,
-                            currentAssessment._id!,
-                            table
-                          ).then((response) => {
-                            if (currentIdx > 0) {
-                              if (currentIdx > 1) {
-                                setBackButtonDisabled(false);
-                              }
-                              setCurrentIdx((cur) => cur - 1);
-                              if (nextButtonDisabled) {
-                                setNextButtonDisabled(false);
-                              }
-                              setStringVal((cur) => "");
-                              setCounterVal((cur) => 0);
-                              setBackButtonText((cur) => "back");
-                            }
-                          });
+                          await handleResponseAndIteration(0)
                         }}
                       >
                         {backButtonText}
@@ -266,44 +272,9 @@ const DeepAssessmentSectionSet = ({
                         className={"deep-assessment-button"}
                         variant={"warning"}
                         disabled={nextButtonDisabled}
-                        onClick={(e: MouseEvent<HTMLElement>) => {
+                        onClick={async (e: MouseEvent<HTMLElement>) => {
                           e.preventDefault();
-                          if (!inProgress) {
-                            setInProgress((cur) => !cur);
-                          }
-                          setNextButtonDisabled(true);
-                          setNextButtonText((cur) => "...");
-                          let dataVal;
-                          if (set[currentIdx].answerType === "counter") {
-                            dataVal = counterVal.toString();
-                          } else {
-                            dataVal = stringVal;
-                          }
-                          setOrUpdateResponse(
-                            set[currentIdx].name,
-                            dataVal,
-                            currentAssessment._id!,
-                            table
-                          ).then((response) => {
-                            if (currentIdx < set.length - 1) {
-                              if (currentIdx <= set.length - 2) {
-                                setNextButtonDisabled(false);
-                              }
-                              setCurrentIdx((cur) => cur + 1);
-                              if (backButtonDisabled) {
-                                setBackButtonDisabled(false);
-                              }
-                              setStringVal((cur) => "");
-                              setCounterVal((cur) => 0);
-                              setNextButtonText((cur) => "next");
-                            } else {
-                              setNextButtonDisabled(true);
-                              setNextButtonText((cur) => "next");
-                              setInProgress((cur) => !cur);
-                            }
-                            setStringVal((cur) => "");
-                            setCounterVal((cur) => 0);
-                          });
+                          await handleResponseAndIteration(1)
                         }}
                       >
                         {nextButtonText}
