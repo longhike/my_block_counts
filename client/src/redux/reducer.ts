@@ -1,7 +1,7 @@
 import { AnyAction, Reducer } from "redux";
-import { ICurrentAssessment, IUser } from "../utils/typings/_interfaces";
+import { IAssessmentIdAddress, IUser } from "../utils/typings/_interfaces";
 
-const initialState: { user: IUser; currentAssessment: ICurrentAssessment } = {
+const initialState: { user: IUser; currentAssessment: IAssessmentIdAddress } = {
   user: {
     username: null,
     email: null,
@@ -25,6 +25,7 @@ const reducer: Reducer = (state = initialState, action: AnyAction) => {
         ...state,
         user: {
           username: null,
+          email: null,
           _id: null,
         },
       };

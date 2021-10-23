@@ -6,6 +6,14 @@ import { IAssessment } from "../models/Assessment";
 type TNewAssessmentShape = {
   _id: string;
   st_address: string;
+  number: string;
+  street: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  country: string;
+  zip: string;
+  coordinates: string;
   weather: string;
   user_id: string;
 };
@@ -19,13 +27,30 @@ export class AssessmentHandler {
   public async setNewAssessment(req: Request, res: Response) {
     try {
       const id = uuid();
-      const assessmentBody: TNewAssessmentShape = { ...req.body, _id: id };
-      const newAssessment = await db.AssessmentModel.create(assessmentBody);
+      const { body } = req;
+      const newAssessmentBody: TNewAssessmentShape = {
+        _id: id,
+        user_id: body.user_id,
+        st_address: body.st_address,
+        number: body.number,
+        street: body.street,
+        neighborhood: body.neighborhood,
+        city: body.city,
+        state: body.state,
+        country: body.country,
+        zip: body.zip,
+        coordinates: body.coordinates,
+        weather: body.weather,
+      };
+      const exists = await db.AssessmentModel.count({
+        where: { st_address: newAssessmentBody.st_address },
+      });
+      if (exists > 0) return res.status(403).send("not_unique")
+      const newAssessment = await db.AssessmentModel.create(newAssessmentBody);
       const { _id, st_address } = newAssessment.get({
         plain: true,
       });
       res.status(200).send({ _id, st_address });
-      // res.status(200).send(newAssessment.getDataValue("_id"));
     } catch (error) {
       console.log(error);
       res.status(500).send("create_error");
@@ -71,10 +96,30 @@ export class AssessmentHandler {
 
   public async updateUserAssessment(req: Request, res: Response) {
     try {
-      const { _id, st_address, weather } = req.body;
+      const {
+        _id,
+        st_address,
+        number,
+        street,
+        neighborhood,
+        city,
+        state,
+        country,
+        zip,
+        coordinates,
+        weather,
+      } = req.body;
       await db.AssessmentModel.update(
         {
           st_address,
+          number: number ? number : null,
+          street: street ? street : null,
+          neighborhood: neighborhood ? neighborhood : null,
+          city: city ? city : null,
+          state: state ? state : null,
+          country: country ? country : null,
+          zip: zip ? zip : null,
+          coordinates: coordinates ? coordinates : null,
           weather,
         },
         {

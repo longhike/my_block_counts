@@ -1,4 +1,4 @@
-import { ICurrentAssessment, IUser } from "../utils/typings/_interfaces";
+import { IAssessmentIdAddress, IUser } from "../utils/typings/_interfaces";
 
 export const setUser = (user: IUser) => {
     return {
@@ -13,7 +13,7 @@ export const unsetUser = () => {
     }
 }
 
-export const setCurrentAssessment = (assessment: ICurrentAssessment) => {
+export const setCurrentAssessment = (assessment: IAssessmentIdAddress) => {
     return {
         type: "SET_CURRENT_ASSESSMENT",
         payload: assessment

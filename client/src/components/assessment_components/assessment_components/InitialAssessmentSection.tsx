@@ -1,14 +1,28 @@
-import { useState, useEffect, ChangeEvent, FormEvent, MouseEvent } from "react";
-import axios, { AxiosResponse } from "axios";
+import { useState, useEffect, FormEvent, MouseEvent } from "react";
+import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { setCurrentAssessment } from "../../../redux/actions";
+import {
+  setCurrentAssessment,
+  unsetCurrentAssessment,
+} from "../../../redux/actions";
 import { TInitialAssessmentSectionProps } from "../../../utils/typings/_types";
+import {
+  getCurrentAssessmentIfExists,
+  createNewAssessment,
+  updateInitialAssessmentInfo,
+} from "../../../api/AssessmentRoutes";
 import FadeIn from "react-fade-in";
 import { Button, Col, Form, Jumbotron, Row } from "react-bootstrap";
 import { ErrorFlag } from "../../../utils/ErrorFlag";
 import { PlacesInput } from "../../../utils/PlacesInput";
-import { ICurrentAssessment, IState } from "../../../utils/typings/_interfaces";
-import { TInitialAssessmentSectionResponse } from "../../../utils/typings/_types";
+import {
+  IAssessmentIdAddress,
+  IState,
+} from "../../../utils/typings/_interfaces";
+import {
+  TInitialAssessmentInfoShape,
+  TAssessmentIdParams,
+} from "../../../utils/typings/_types";
 import { useHistory } from "react-router";
 
 const InitialAssessmentSection = ({
@@ -17,21 +31,30 @@ const InitialAssessmentSection = ({
   const history = useHistory();
   const dispatch = useDispatch();
   const [message, setMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [error, setError] = useState<boolean>(false);
   const [buttonDisabled, setButtonDisabled] = useState<boolean>(false);
-  const currentAssessment: ICurrentAssessment = useSelector(
+  const currentAssessment: IAssessmentIdAddress = useSelector(
     (state: IState) => state.currentAssessment
   );
+  const { assessment_id }: TAssessmentIdParams = useParams();
   const userID = useSelector((state: IState) => state.user._id);
-  const [responses, setResponses] = useState<TInitialAssessmentSectionResponse>(
-    {
-      _id: currentAssessment._id || "",
-      user_id: userID || "",
-      st_address: "",
-      weather: "nice",
-      loc_intersection: "peepee and poopoo",
-    }
-  );
+  const initialResponseState: TInitialAssessmentInfoShape = {
+    _id: assessment_id || "",
+    user_id: userID || "",
+    st_address: "",
+    number: "",
+    street: "",
+    neighborhood: "",
+    city: "",
+    state: "",
+    country: "",
+    zip: "",
+    coordinates: "",
+    weather: "nice",
+  };
+  const [responses, setResponses] =
+    useState<TInitialAssessmentInfoShape>(initialResponseState);
 
   const weatherIcons = [
     {
@@ -56,43 +79,53 @@ const InitialAssessmentSection = ({
     },
   ];
 
-  const getInitialDataAndHandleState = (): void => {
-    axios
-      .get("/assessments/get-user-assessment", {
-        params: {
-          _id: currentAssessment._id,
-        },
-      })
-      .then((response: AxiosResponse) => {
-        setMessage("Let's confirm the initial info you submitted.");
-        const res = response.data;
-        setResponses({
-          ...responses,
-          st_address: res.st_address,
-          weather: res.weather,
-          loc_intersection: res.loc_intersection,
-        });
+  const getInitialDataAndHandleState = async () => {
+    try {
+      const {
+        st_address,
+        number,
+        street,
+        neighborhood,
+        city,
+        state,
+        country,
+        zip,
+        coordinates,
+        weather,
+      } = await getCurrentAssessmentIfExists(assessment_id);
+      dispatch(setCurrentAssessment({ _id: assessment_id, st_address }));
+      setMessage("Let's confirm the initial info you submitted.");
+      setResponses({
+        ...responses,
+        st_address,
+        number,
+        street,
+        neighborhood,
+        city,
+        state,
+        country,
+        zip,
+        coordinates,
+        weather,
       });
+    } catch (error) {}
   };
 
-  const createOrUpdateSessionAndInitiate = async (): Promise<AxiosResponse> => {
+  const createOrUpdateSessionAndInitiate = async (): Promise<any> => {
     if (!currentAssessment._id) {
-      const response: AxiosResponse = await axios.post(
-        "/assessments/new-assessment",
-        responses
-      );
+      const response: any = await createNewAssessment(responses);
       return response;
     } else {
-      const response: AxiosResponse = await axios.put(
-        "/assessments/update-user-assessment",
-        responses
-      );
+      const response: any = await updateInitialAssessmentInfo(responses);
       return response;
     }
   };
 
   useEffect(() => {
     if (responses.st_address.length <= 0) {
+      setErrorMessage(
+        "please enter a valid street address in order to proceed"
+      );
       setError((cur) => true);
       setButtonDisabled((cur) => true);
     } else {
@@ -107,9 +140,11 @@ const InitialAssessmentSection = ({
   }, [responses.st_address]);
 
   useEffect(() => {
-    if (currentAssessment._id !== null) {
+    if (assessment_id) {
       getInitialDataAndHandleState();
     } else {
+      dispatch(unsetCurrentAssessment());
+      setResponses({ ...responses, ...initialResponseState });
       setMessage("OK! First, let's get some general info out of the way.");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,8 +160,22 @@ const InitialAssessmentSection = ({
           <FadeIn>
             <div className={"initial-section-text-holder"}>
               <h4>{message}</h4>
-              {currentAssessment._id ? (
-                ""
+              {assessment_id ? (
+                <p>
+                  (or you can{" "}
+                  <span
+                    className={"navigation-link"}
+                    onClick={(e: MouseEvent<HTMLElement>) => {
+                      e.preventDefault();
+                      dispatch(unsetCurrentAssessment());
+                      setResponses({ ...responses, ...initialResponseState });
+                      history.push("/assessment");
+                    }}
+                  >
+                    start a new assessment
+                  </span>
+                  )
+                </p>
               ) : (
                 <p>
                   (or you can{" "}
@@ -147,22 +196,15 @@ const InitialAssessmentSection = ({
             <Row>
               <Col md={6}>
                 <Form.Group>
-                  <Form.Label>
-                    Enter the address closest to your vantage point
-                  </Form.Label>
-                  {/* <PlacesInput
-                    
-                  /> */}
-                  <Form.Control
-                    name={"st_address"}
-                    value={responses.st_address}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                      setResponses({
-                        ...responses,
-                        [e.currentTarget.name]: e.currentTarget.value,
-                      });
-                    }}
+                  <PlacesInput
+                    responses={responses}
+                    setResponses={setResponses}
                   />
+                  <h5>
+                    {responses.st_address.length > 0
+                      ? responses.st_address
+                      : "no address selected"}
+                  </h5>
                 </Form.Group>
               </Col>
               <Col md={6}>
@@ -200,27 +242,51 @@ const InitialAssessmentSection = ({
                 </Form.Group>
               </Col>
             </Row>
-            {error ? (
-              <ErrorFlag message="please enter a street address in order to proceed" />
-            ) : (
-              ""
-            )}
+            {error ? <ErrorFlag message={errorMessage} /> : ""}
             <Form.Group className={"dive-in-button-holder"}>
               <Button
                 disabled={buttonDisabled}
                 variant={"info"}
-                onClick={(e: MouseEvent<HTMLElement>) => {
+                onClick={async (e: MouseEvent<HTMLElement>) => {
                   e.preventDefault();
                   setError((cur) => false);
                   if (responses.st_address.length <= 0) {
+                    setErrorMessage(
+                      "please enter a valid street address in order to proceed"
+                    );
                     setError((cur) => true);
                   } else {
-                    createOrUpdateSessionAndInitiate().then(
-                      (response: AxiosResponse) => {
-                        dispatch(setCurrentAssessment(response.data));
-                        setSessionInitiated((cur) => true);
+                    try {
+                      const data: IAssessmentIdAddress | any =
+                        await createOrUpdateSessionAndInitiate();
+                      if (!data._id || !data.st_address) {
+                        if (data.response.status === 403)
+                          throw new Error("not_unique");
+                        else throw new Error("create_error");
                       }
-                    );
+                      dispatch(setCurrentAssessment(data));
+                      setSessionInitiated((cur) => true);
+                    } catch (error: any) {
+                      switch (error.message) {
+                        case "not_unique":
+                          setErrorMessage(
+                            "There's already an assessment for this specific address on the block. If you are the one who created it, please update it by going to the update an assessment section. If not, please enter an address as close to the one you've attempted to enter as possible."
+                          );
+                          break;
+                        case "create_error":
+                          setErrorMessage(
+                            "Sorry, something went wrong - please refresh the page and try again"
+                          );
+                          break;
+                        default:
+                          setErrorMessage(
+                            "Oh dear, something went wrong - please refresh the page and try again"
+                          );
+                          break;
+                      }
+                      setError((cur) => true);
+                      setButtonDisabled((cur) => true);
+                    }
                   }
                 }}
               >

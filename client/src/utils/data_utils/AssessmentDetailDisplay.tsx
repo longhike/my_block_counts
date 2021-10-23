@@ -1,11 +1,8 @@
-import { useState, MouseEvent } from "react";
+import { useState } from "react";
 import { Col, Row } from "react-bootstrap";
-import AssessmentDisplaySidebar from "../../../../utils/AssessmentDisplaySidebar";
-import { SECTIONS } from "../../../../utils/data_map";
-
-type TAssessmentDetailDisplay = {
-  data: any[];
-};
+import AssessmentDisplaySidebar from "../AssessmentDisplaySidebar";
+import { SECTIONS } from "./data_map";
+import { TAssessmentDetailDisplay} from "../typings/_types"
 
 const AssessmentDetailDisplay = ({ data }: TAssessmentDetailDisplay) => {
   const [pageIdx, setPageIdx] = useState<number>(0);

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { unsetCurrentAssessment } from "../../redux/actions";
 import Contact from "./Contact";
 import { IState } from "../../utils/typings/_interfaces"
+import BackButton from "../../utils/BackButton";
 
 const About = () => {
 
@@ -16,9 +17,13 @@ const About = () => {
 
   useEffect(() => {
     if (curAssessId) dispatch(unsetCurrentAssessment());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
+    <>
+    <BackButton prev={""} />
     <FadeIn>
+      
       <Jumbotron style={{ textAlign: "start" }}>
         <Row style={{marginBottom: "5px"}}>
           <Col>
@@ -62,6 +67,7 @@ const About = () => {
         </Row>
       </Jumbotron>
     </FadeIn>
+    </>
   );
 };
 

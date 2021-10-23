@@ -32,7 +32,7 @@ const UserAssessmentListItem = ({
                   dispatch(
                     setCurrentAssessment({ _id: assessment_id, st_address })
                   );
-                  history.push("/assessment");
+                  history.push(`/assessment/${assessment_id}`);
                 }}
               >
                 Update
@@ -49,7 +49,7 @@ const UserAssessmentListItem = ({
                       params: { id: assessment_id },
                     });
                     getUserAssessmentsAndHandleStateIfExist();
-                  } catch (error) {
+                  } catch (error: any) {
                     console.log(error.message);
                   }
                 }}
